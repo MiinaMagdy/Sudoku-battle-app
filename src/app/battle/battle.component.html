@@ -1,0 +1,179 @@
+<div class="battle-container">
+  <!-- Player joining screen -->
+  <div class="join-container" *ngIf="isJoining">
+    <div class="join-panel">
+      <h2>Join Sudoku Battle</h2>
+      <p>Difficulty: {{ difficulty }}</p>
+      
+      <div class="form-group">
+        <label for="playerName">Your Name:</label>
+        <input 
+          type="text" 
+          id="playerName" 
+          [(ngModel)]="playerName" 
+          placeholder="Enter your name" 
+          maxlength="15"
+          class="name-input"
+        >
+      </div>
+      
+      <div class="battle-rules">
+        <h3>Battle Rules:</h3>
+        <ul>
+          <li>First player to complete the puzzle wins</li>
+          <li>You are allowed a maximum of {{ maxMistakes }} mistakes</li>
+          <li>Keep track of your opponent's progress</li>
+        </ul>
+      </div>
+      
+      <button class="battle-button" (click)="joinBattle()">
+        <span class="material-icons">sports_esports</span>
+        Join Battle
+      </button>
+      
+      <button class="back-button" [routerLink]="['/difficulty']">
+        <span class="material-icons">arrow_back</span>
+        Back
+      </button>
+    </div>
+  </div>
+
+  <!-- Battle game screen -->
+  <div class="game-container" *ngIf="!isJoining">
+    <div class="battle-header">
+      <h2>Sudoku Battle</h2>
+      
+      <div class="players-info">
+        <div class="player-status you">
+          <strong>You ({{ playerName }})</strong>
+          <div class="stats">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="progress"></div>
+            </div>
+            <div class="mistakes">
+              Mistakes: {{ mistakes }}/{{ maxMistakes }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="vs-indicator">VS</div>
+        
+        <div class="player-status opponent" *ngIf="battleState">
+          <strong>{{ getOpponentName() }}</strong>
+          <div class="stats">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getOpponentProgress()"></div>
+            </div>
+            <div class="mistakes">
+              Mistakes: {{ getOpponentMistakes() }}/{{ maxMistakes }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="battle-stats">
+        <div class="timer">
+          <span class="material-icons">timer</span>
+          <span>{{ formatTime() }}</span>
+        </div>
+        <div class="difficulty">
+          <span class="material-icons">leaderboard</span>
+          <span>{{ difficulty }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sudoku-grid">
+      @for (row of grid; track $index; let rowIndex = $index) {
+        <div class="grid-row">
+          @for (cell of row; track $index) {
+            <div 
+              class="grid-cell" 
+              [class]="getCellBackgroundClass(rowIndex, $index)"
+              [class.original]="cell.isOriginal"
+              [class.invalid]="!cell.isValid"
+              (click)="selectCell(rowIndex, $index)"
+            >
+              @if (cell.value) {
+                <span class="cell-value">{{ cell.value }}</span>
+              } @else if (cell.notes.includes(true)) {
+                <div class="notes-container">
+                  @for (note of cell.notes; track $index) {
+                    <span class="note" *ngIf="note">{{ $index + 1 }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="controls">
+      <div class="number-pad">
+        @for (num of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track num) {
+          <button class="number-button" (click)="inputNumber(num)">{{ num }}</button>
+        }
+      </div>
+      
+      <div class="action-buttons">
+        <button class="action-button" (click)="toggleMode()">
+          <span class="material-icons">{{ currentMode === 'number' ? 'edit' : 'format_list_numbered' }}</span>
+          <span>{{ currentMode === 'number' ? 'Notes' : 'Numbers' }}</span>
+        </button>
+        
+        <button class="action-button" (click)="clearCell()">
+          <span class="material-icons">backspace</span>
+          <span>Clear</span>
+        </button>
+        
+        @if (isGameStarted && !isGamePaused) {
+          <button class="action-button" (click)="pauseGame()">
+            <span class="material-icons">pause</span>
+            <span>Pause</span>
+          </button>
+        } @else if (isGamePaused) {
+          <button class="action-button resume" (click)="resumeGame()">
+            <span class="material-icons">play_arrow</span>
+            <span>Resume</span>
+          </button>
+        }
+        
+        <button class="action-button exit" (click)="exitBattle()">
+          <span class="material-icons">exit_to_app</span>
+          <span>Exit</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status overlay -->
+  @if (showStatusOverlay) {
+    <div class="status-overlay">
+      <div class="status-content">
+        <h2>{{ statusMessage }}</h2>
+        
+        @if (battleState?.status === 'finished') {
+          <button class="action-button" [routerLink]="['/']">
+            <span class="material-icons">home</span>
+            Back to Home
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Pause overlay -->
+  @if (isGamePaused) {
+    <div class="pause-overlay">
+      <div class="pause-content">
+        <span class="material-icons large">pause_circle_filled</span>
+        <h2>Game Paused</h2>
+        <button class="resume-button" (click)="resumeGame()">
+          <span class="material-icons">play_arrow</span>
+          Resume Game
+        </button>
+      </div>
+    </div>
+  }
+</div>

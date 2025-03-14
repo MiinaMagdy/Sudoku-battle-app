@@ -1,0 +1,96 @@
+<div class="gameboard-container" [class.paused]="isGamePaused">
+  <div class="game-header">
+    <h2>Sudoku Battle</h2>
+    <div class="game-stats">
+      <div class="timer">
+        <span class="material-icons">timer</span>
+        <span>{{ formatTime() }}</span>
+      </div>
+      <div class="difficulty">
+        <span class="material-icons">leaderboard</span>
+        <span>{{ difficulty }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sudoku-grid">
+    @for (row of grid; track $index; let rowIndex = $index) {
+      <div class="grid-row">
+        @for (cell of row; track $index) {
+          <div 
+            class="grid-cell" 
+            [class]="getCellBackgroundClass(rowIndex, $index)"
+            [class.original]="cell.isInitial"
+            [class.invalid]="!cell.isValid"
+            (click)="selectCell(rowIndex, $index)"
+          >
+            @if (cell.value) {
+              <span class="cell-value">{{ cell.value }}</span>
+            } @else if (cell.notes.includes(true)) {
+              <div class="notes-container">
+                @for (note of cell.notes; track $index) {
+                  <span class="note" *ngIf="note">{{ $index + 1 }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="controls">
+    <div class="number-pad">
+      @for (num of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track num) {
+        <button class="number-button" (click)="inputNumber(num)">{{ num }}</button>
+      }
+    </div>
+    
+    <div class="action-buttons">
+      <button class="action-button" (click)="toggleMode()">
+        <span class="material-icons">{{ currentMode === 'number' ? 'edit' : 'format_list_numbered' }}</span>
+        <span>{{ currentMode === 'number' ? 'Notes' : 'Numbers' }}</span>
+      </button>
+      
+      <button class="action-button" (click)="clearCell()">
+        <span class="material-icons">backspace</span>
+        <span>Clear</span>
+      </button>
+      
+      <button class="action-button" (click)="resetGame()">
+        <span class="material-icons">refresh</span>
+        <span>Reset</span>
+      </button>
+      
+      @if (isGameStarted && !isGamePaused) {
+        <button class="action-button" (click)="pauseGame()">
+          <span class="material-icons">pause</span>
+          <span>Pause</span>
+        </button>
+      } @else if (isGamePaused) {
+        <button class="action-button resume" (click)="resumeGame()">
+          <span class="material-icons">play_arrow</span>
+          <span>Resume</span>
+        </button>
+      }
+      
+      <button class="action-button" (click)="goBackToDifficultySelection()">
+        <span class="material-icons">arrow_back</span>
+        <span>Back</span>
+      </button>
+    </div>
+  </div>
+
+  @if (isGamePaused) {
+    <div class="pause-overlay">
+      <div class="pause-content">
+        <span class="material-icons large">pause_circle_filled</span>
+        <h2>Game Paused</h2>
+        <button class="resume-button" (click)="resumeGame()">
+          <span class="material-icons">play_arrow</span>
+          Resume Game
+        </button>
+      </div>
+    </div>
+  }
+</div>

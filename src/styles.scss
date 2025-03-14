@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Reset browser default margins and padding */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh; /* Use viewport height */
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+app-root {
+  display: block;
+  height: 100vh; /* Make the root component take full viewport height */
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+}

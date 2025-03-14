@@ -1,0 +1,68 @@
+<div class="difficulty-container">
+  <div class="header">
+    <h1>Select Game Mode</h1>
+  </div>
+
+  <div class="mode-selector">
+    <button 
+      class="mode-button" 
+      [class.active]="selectedMode === 'single'" 
+      (click)="selectMode('single')"
+    >
+      <span class="material-icons">person</span>
+      Single Player
+    </button>
+    
+    <button 
+      class="mode-button" 
+      [class.active]="selectedMode === 'battle'" 
+      (click)="selectMode('battle')"
+    >
+      <span class="material-icons">sports_kabaddi</span>
+      Battle Mode
+    </button>
+  </div>
+
+  <h2 class="subheading">Select Difficulty</h2>
+
+  <div class="difficulty-options">
+    <button class="difficulty-button" (click)="selectDifficulty('easy')">
+      <span class="material-icons">sentiment_satisfied</span>
+      <div>
+        <h3>Easy</h3>
+        <p>Perfect for beginners</p>
+      </div>
+    </button>
+
+    <button class="difficulty-button" (click)="selectDifficulty('medium')">
+      <span class="material-icons">sentiment_neutral</span>
+      <div>
+        <h3>Medium</h3>
+        <p>For experienced players</p>
+      </div>
+    </button>
+
+    <button class="difficulty-button" (click)="selectDifficulty('hard')">
+      <span class="material-icons">sentiment_very_dissatisfied</span>
+      <div>
+        <h3>Hard</h3>
+        <p>For sudoku experts</p>
+      </div>
+    </button>
+  </div>
+
+  <button class="back-button" (click)="goBack()">
+    <span class="material-icons">arrow_back</span>
+    Back to Home
+  </button>
+
+  <div class="mode-info" *ngIf="selectedMode === 'battle'">
+    <div class="info-box">
+      <span class="material-icons large">info</span>
+      <div>
+        <h3>Battle Mode</h3>
+        <p>Compete against another player in real-time. First to complete the puzzle wins! You have a maximum of 3 mistakes.</p>
+      </div>
+    </div>
+  </div>
+</div>
