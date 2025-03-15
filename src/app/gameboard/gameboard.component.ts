@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameBoardService } from '../services/gameboard.service'; // Adjust the path as necessary
@@ -30,6 +30,7 @@ export class GameboardComponent implements OnInit {
   timerInterval: any;
   isGameStarted: boolean = false;
   isGamePaused: boolean = false;
+  @Input() canPauseGame: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -115,12 +116,95 @@ export class GameboardComponent implements OnInit {
       cell.value = cell.value === num ? null : num;
       // Validate after setting value
       this.validateMove(row, col);
+      // remove all notes in the row, column and box with the same number
+      if (cell.isValid) {
+        this.removeNotes(row, col, num);
+      }
       // Check if game is completed
       this.checkGameCompletion();
     } else {
       // Toggle note for this number
       cell.notes[num - 1] = !cell.notes[num - 1];
+      // Validate notes
+      this.validateNotes(row, col, num);
     }
+  }
+
+  validateNotes(row: number, col: number, num: number): void {
+    const noteValue = num;
+    let isValid = true;
+    let invalidatedCell = { row, col };
+
+    // Check row
+    for (let i = 0; i < 9; i++) {
+      if (i !== col && this.grid[row][i].value === num) {
+        isValid = false;
+        invalidatedCell = { row, col: i };
+        break;
+      }
+    }
+
+    // Check column
+    for (let i = 0; i < 9; i++) {
+      if (i !== row && this.grid[i][col].value === num) {
+        isValid = false;
+        invalidatedCell = { row: i, col };
+        break;
+      }
+    }
+
+    // Check 3x3 box
+    const boxRow = Math.floor(row / 3) * 3;
+    const boxCol = Math.floor(col / 3) * 3;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        const r = boxRow + i;
+        const c = boxCol + j;
+        if ((r !== row || c !== col) && this.grid[r][c].value === num) {
+          isValid = false;
+          invalidatedCell = { row: r, col: c };
+          break;
+        }
+      }
+    }
+
+    if (!isValid) {
+      this.grid[row][col].notes[noteValue - 1] = false;
+      this.animateInvalidNoteCell(invalidatedCell.row, invalidatedCell.col);
+    }
+  }
+
+  removeNotes(row: number, col: number, num: number): void {
+    for (let i = 0; i < 9; i++) {
+      this.grid[row][i].notes[num - 1] = false;
+      this.grid[i][col].notes[num - 1] = false;
+    }
+
+    const boxRow = Math.floor(row / 3) * 3;
+    const boxCol = Math.floor(col / 3) * 3;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        this.grid[boxRow + i][boxCol + j].notes[num - 1] = false;
+      }
+    }
+  }
+
+  animateInvalidNoteCell(row: number, col: number): void {
+    const cellElement = document.querySelector(
+      `.grid-row:nth-child(${row + 1}) .grid-cell:nth-child(${col + 1})`
+    );
+    if (cellElement) {
+      cellElement.classList.add('invalid-note');
+      setTimeout(() => {
+        cellElement.classList.remove('invalid-note');
+      }, 1000);
+    }
+  }
+
+  isNoted(num: number) {
+    if (!this.selectedCell) return false;
+    const { row, col } = this.selectedCell;
+    return this.grid[row][col].notes[num - 1];
   }
 
   validateMove(row: number, col: number): void {
@@ -198,6 +282,7 @@ export class GameboardComponent implements OnInit {
   }
 
   pauseGame(): void {
+    if (!this.canPauseGame) return;
     this.isGamePaused = true;
     clearInterval(this.timerInterval);
   }
@@ -237,7 +322,7 @@ export class GameboardComponent implements OnInit {
     clearInterval(this.timerInterval);
     this.isGameStarted = false;
 
-    // In a real app, you'd display a success message or modal here
+    // TODO: In a real app, you'd display a success message or modal here
     console.log('Game completed successfully in', this.formatTime());
     return true;
   }
@@ -246,7 +331,13 @@ export class GameboardComponent implements OnInit {
   getCellBackgroundClass(row: number, col: number): string {
     const cell = this.grid[row][col];
 
-    if (cell.isSelected) {
+    if (
+      cell.isSelected ||
+      (this.selectedCell &&
+        cell.value &&
+        cell.value ===
+          this.grid[this.selectedCell.row][this.selectedCell.col].value)
+    ) {
       return 'selected-cell';
     }
 

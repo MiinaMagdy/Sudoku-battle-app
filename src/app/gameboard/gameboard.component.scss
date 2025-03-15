@@ -13,10 +13,7 @@
   color: white;
   padding: 1rem;
   position: relative;
-  
-  &.paused {
-    // filter: blur(1px);
-  }
+
 }
 
 .game-header {
@@ -111,6 +108,10 @@
         color: #f44336;
       }
       
+      &.invalid-note {
+        animation: fadeIn 1s ease-in-out;
+      }
+      
       .cell-value {
         font-size: 1.5rem;
       }
@@ -128,9 +129,28 @@
           display: flex;
           align-items: center;
           justify-content: center;
+          
+          &:nth-child(1) { grid-area: 1 / 1; }
+          &:nth-child(2) { grid-area: 1 / 2; }
+          &:nth-child(3) { grid-area: 1 / 3; }
+          &:nth-child(4) { grid-area: 2 / 1; }
+          &:nth-child(5) { grid-area: 2 / 2; }
+          &:nth-child(6) { grid-area: 2 / 3; }
+          &:nth-child(7) { grid-area: 3 / 1; }
+          &:nth-child(8) { grid-area: 3 / 2; }
+          &:nth-child(9) { grid-area: 3 / 3; }
         }
       }
     }
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    background-color: rgba(255, 0, 0, 0.5);
+  }
+  100% {
+    background-color: transparent;
   }
 }
 
@@ -154,6 +174,7 @@
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
+
       
       &:hover {
         background-color: white;
@@ -163,6 +184,16 @@
       
       &:active {
         transform: translateY(0);
+      }
+    }
+
+    .note-number {
+      background-color: rgba(55, 55, 55, 0.5);
+      color: whitesmoke;
+
+      &.noted {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #333;
       }
     }
   }
@@ -246,7 +277,7 @@
       padding: 0.75rem 1.5rem;
       border-radius: 30px;
       font-size: 1.1rem;
-      margin-top: 1rem;
+      margin: 1rem auto;
       cursor: pointer;
       display: flex;
       align-items: center;

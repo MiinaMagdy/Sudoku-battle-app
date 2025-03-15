@@ -29,7 +29,7 @@
             } @else if (cell.notes.includes(true)) {
               <div class="notes-container">
                 @for (note of cell.notes; track $index) {
-                  <span class="note" *ngIf="note">{{ $index + 1 }}</span>
+                  <span class="note">{{( cell.notes[$index] ? $index + 1 : "" )}}</span>
                 }
               </div>
             }
@@ -42,7 +42,7 @@
   <div class="controls">
     <div class="number-pad">
       @for (num of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track num) {
-        <button class="number-button" (click)="inputNumber(num)">{{ num }}</button>
+        <button class="number-button" [class.note-number]="currentMode === 'notes'" [class.noted]="isNoted(num)" (click)="inputNumber(num)">{{ num }}</button>
       }
     </div>
     
@@ -62,7 +62,7 @@
         <span>Reset</span>
       </button>
       
-      @if (isGameStarted && !isGamePaused) {
+      @if (canPauseGame && isGameStarted && !isGamePaused) {
         <button class="action-button" (click)="pauseGame()">
           <span class="material-icons">pause</span>
           <span>Pause</span>
